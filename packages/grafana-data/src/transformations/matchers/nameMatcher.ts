@@ -115,8 +115,14 @@ function fieldNameFallback(fields: Set<string>) {
       );
     };
   } else if (fields.has('Time') || fields.has('time')) {
+    // Only applies when the frame has no field under the requested name; otherwise every
+    // time-typed field (e.g. a second time column) would match when one of them is named "time".
     fallback = (field: Field, frame: DataFrame) => {
-      return frame.meta?.typeVersion == null && field.type === FieldType.time;
+      return (
+        frame.meta?.typeVersion == null &&
+        field.type === FieldType.time &&
+        !frame.fields.some((f) => fields.has(f.name))
+      );
     };
   }
 
